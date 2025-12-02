@@ -73,6 +73,7 @@ public class UserDatabase {
             return false; // Empty username or password
         }
 
+        newUser.setId(generateUserId()); // Assign ID here
         users.add(newUser);
         return true;
     }
@@ -85,6 +86,20 @@ public class UserDatabase {
     public boolean adminExists() {
         for (User user : users) {
             if (user.isAdmin()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean deleteUser(String userId) {
+        return users.removeIf(user -> user.getId().equals(userId));
+    }
+
+    public boolean updateUser(User updatedUser) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getId().equals(updatedUser.getId())) {
+                users.set(i, updatedUser);
                 return true;
             }
         }

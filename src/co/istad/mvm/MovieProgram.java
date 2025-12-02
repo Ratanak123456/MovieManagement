@@ -233,22 +233,46 @@ public class MovieProgram {
         ViewUtil.print(table.render(), true);
     }
 
+    private void manageProfile() {
+        while (true) {
+            User currentUser = authService.getSession().getCurrentUser();
+            ViewUtil.printHeader("👤 USER PROFILE");
+
+            Table table = new Table(2, BorderStyle.UNICODE_ROUND_BOX_WIDE);
+            table.setColumnWidth(0, 15, 20);
+            table.setColumnWidth(1, 25, 30);
+
+            table.addCell("Username");
+            table.addCell(currentUser.getUsername());
+            table.addCell("Role");
+            table.addCell(currentUser.getRole());
+            table.addCell("Permissions");
+            table.addCell(currentUser.isAdmin() ? "Full Access" : "Read Only");
+
+            ViewUtil.print(table.render(), true);
+
+            Table optionsTable = new Table(1, BorderStyle.UNICODE_ROUND_BOX_WIDE);
+            optionsTable.setColumnWidth(0, 40, 50);
+            optionsTable.addCell("PROFILE OPTIONS", new CellStyle(CellStyle.HorizontalAlign.center));
+            optionsTable.addCell("1) ✏️ Edit Profile", new CellStyle(CellStyle.HorizontalAlign.center));
+            optionsTable.addCell("0) ↩️ Back", new CellStyle(CellStyle.HorizontalAlign.center));
+            ViewUtil.print(optionsTable.render(), true);
+
+            int choice = InputUtil.getInt("Choose option: ");
+            switch (choice) {
+                case 1:
+                    editUserProfile();
+                    break;
+                case 0:
+                    return;
+                default:
+                    ViewUtil.printErrorMessage("Invalid choice! Please try again.");
+            }
+        }
+    }
+
     private void viewProfile() {
-        User currentUser = authService.getSession().getCurrentUser();
-        ViewUtil.printHeader("👤 USER PROFILE");
-
-        Table table = new Table(2, BorderStyle.UNICODE_ROUND_BOX_WIDE);
-        table.setColumnWidth(0, 15, 20);
-        table.setColumnWidth(1, 25, 30);
-
-        table.addCell("Username");
-        table.addCell(currentUser.getUsername());
-        table.addCell("Role");
-        table.addCell(currentUser.getRole());
-        table.addCell("Permissions");
-        table.addCell(currentUser.isAdmin() ? "Full Access" : "Read Only");
-
-        ViewUtil.print(table.render(), true);
+        manageProfile();
     }
 
     private void manageUsers() {
@@ -273,7 +297,8 @@ public class MovieProgram {
             optionsTable.setColumnWidth(0, 40, 50);
             optionsTable.addCell("USER MANAGEMENT OPTIONS", new CellStyle(CellStyle.HorizontalAlign.center));
             optionsTable.addCell("1) ➕ Add New User", new CellStyle(CellStyle.HorizontalAlign.center));
-            optionsTable.addCell("2) 🔄 Refresh List", new CellStyle(CellStyle.HorizontalAlign.center));
+            optionsTable.addCell("2) ❌ Delete User", new CellStyle(CellStyle.HorizontalAlign.center));
+            optionsTable.addCell("3) 🔄 Refresh List", new CellStyle(CellStyle.HorizontalAlign.center));
             optionsTable.addCell("0) ↩️ Back to Admin Menu", new CellStyle(CellStyle.HorizontalAlign.center));
             ViewUtil.print(optionsTable.render(), true);
 
@@ -284,6 +309,9 @@ public class MovieProgram {
                     addNewUser();
                     break;
                 case 2:
+                    deleteUserAdmin(); // New method for admin to delete user
+                    break;
+                case 3:
                     // Refresh the user list
                     users = authService.getUserDatabase().getAllUsers();
                     ViewUtil.printHeader("👥 USER MANAGEMENT - REFRESHED");
@@ -297,6 +325,86 @@ public class MovieProgram {
             }
         }
     }
+    private void editUserProfile() {
+        ViewUtil.printHeader("✏️ EDIT PROFILE");
+        User currentUser = authService.getSession().getCurrentUser();
+
+        ViewUtil.printSuccessMessage("Enter new details (press Enter to keep current value):");
+
+        String newUsername = InputUtil.getString("Enter new username [" + currentUser.getUsername() + "]: ");
+        String newPassword = InputUtil.getString("Enter new password (leave empty to keep current) : ");
+
+        User updatedUser = new User();
+        updatedUser.setId(currentUser.getId());
+        updatedUser.setRole(currentUser.getRole()); // Role cannot be changed by user
+
+        if (!newUsername.isEmpty()) {
+            // Check if new username already exists and is not the current user's username
+            if (!newUsername.equalsIgnoreCase(currentUser.getUsername()) && authService.userExists(newUsername)) {
+                ViewUtil.printErrorMessage("Username '" + newUsername + "' already exists! Please choose a different username.");
+                return;
+            }
+            updatedUser.setUsername(newUsername);
+        } else {
+            updatedUser.setUsername(currentUser.getUsername());
+        }
+
+        if (!newPassword.isEmpty()) {
+            updatedUser.setPassword(newPassword);
+        } else {
+            updatedUser.setPassword(currentUser.getPassword());
+        }
+
+        if (authService.updateUser(updatedUser)) {
+            // Update the session's current user to reflect changes
+            authService.getSession().login(updatedUser);
+            ViewUtil.printSuccessMessage("Profile updated successfully! ✅");
+        } else {
+            ViewUtil.printErrorMessage("Failed to update profile! ❌");
+        }
+    }
+
+    private void deleteUserAdmin() {
+        ViewUtil.printHeader("❌ DELETE USER");
+        String userIdToDelete = InputUtil.getString("Enter User ID to delete: ");
+
+        User currentUser = authService.getSession().getCurrentUser();
+        if (currentUser != null && currentUser.getId().equals(userIdToDelete)) {
+            ViewUtil.printErrorMessage("You cannot delete your own account !");
+            return;
+        }
+
+        List<User> allUsers = authService.getUserDatabase().getAllUsers();
+        User userToDelete = allUsers.stream()
+                                    .filter(user -> user.getId().equals(userIdToDelete))
+                                    .findFirst()
+                                    .orElse(null);
+
+        if (userToDelete == null) {
+            ViewUtil.printErrorMessage("User with ID '" + userIdToDelete + "' not found!");
+            return;
+        }
+
+        ViewUtil.printHeader("👤 USER TO DELETE");
+        Table userDetailTable = new Table(2, BorderStyle.UNICODE_ROUND_BOX_WIDE);
+        userDetailTable.setColumnWidth(0, 15, 20);
+        userDetailTable.setColumnWidth(1, 25, 30);
+        userDetailTable.addCell("ID");
+        userDetailTable.addCell(userToDelete.getId());
+        userDetailTable.addCell("Username");
+        userDetailTable.addCell(userToDelete.getUsername());
+        userDetailTable.addCell("Role");
+        userDetailTable.addCell(userToDelete.getRole());
+        ViewUtil.print(userDetailTable.render(), true);
+
+        String confirm = InputUtil.getString("Are you sure you want to delete this user? (y/n): ");
+        if (confirm.equalsIgnoreCase("y")) {
+            ViewUtil.printSuccessMessage("User '" + userToDelete.getUsername() + "' deleted successfully! ✅");
+        } else {
+            ViewUtil.printSuccessMessage("Deletion cancelled. ↩️");
+        }
+    }
+
     private void manageMovies() {
         while (true) {
             Table table = getTable();

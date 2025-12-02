@@ -57,7 +57,6 @@ public class AuthServiceImpl implements AuthService { // Changed class declarati
 
         // Create new user using setters (no parameterized constructor)
         User newUser = new User();
-        newUser.setId(generateUserId());
         newUser.setUsername(username);
         newUser.setPassword(password);
         newUser.setRole("USER");
@@ -75,7 +74,41 @@ public class AuthServiceImpl implements AuthService { // Changed class declarati
         return userDatabase.userExists(username);
     }
 
-    private String generateUserId() {
-        return "USR-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    @Override
+    public boolean deleteUser(String userId) {
+        User userToDelete = userDatabase.getAllUsers().stream()
+                                    .filter(user -> user.getId().equals(userId))
+                                    .findFirst()
+                                    .orElse(null);
+
+        if (userToDelete == null) {
+            return false; // User not found
+        }
+
+        // Prevent admin from deleting themselves if they are the only admin
+        if (userToDelete.isAdmin()) {
+            long adminCount = userDatabase.getAllUsers().stream().filter(User::isAdmin).count();
+            if (adminCount == 1 && session.getCurrentUser() != null && session.getCurrentUser().getId().equals(userId)) {
+                return false; // Cannot delete the last admin
+            }
+        }
+        return userDatabase.deleteUser(userId);
+    }
+
+    @Override
+    public boolean updateUser(User updatedUser) {
+        if (updatedUser == null || updatedUser.getId() == null || updatedUser.getId().trim().isEmpty()) {
+            return false; // Invalid user or ID
+        }
+
+        User currentUser = session.getCurrentUser();
+        if (currentUser == null || !currentUser.getId().equals(updatedUser.getId())) {
+            return false; // Unauthorized update (user can only update their own profile)
+        }
+
+        // Ensure role is not changed by user
+        updatedUser.setRole(currentUser.getRole());
+
+        return userDatabase.updateUser(updatedUser);
     }
 }
