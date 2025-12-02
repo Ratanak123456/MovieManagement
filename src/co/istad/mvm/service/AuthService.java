@@ -11,5 +11,7 @@ public interface AuthService {
     UserDatabase getUserDatabase();
     String register(String username, String password);
     boolean userExists(String username);
+    boolean deleteUser(String userId);
     boolean updateUser(User updatedUser);
+    User findUserById(String id);
 }

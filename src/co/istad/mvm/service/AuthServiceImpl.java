@@ -76,10 +76,7 @@ public class AuthServiceImpl implements AuthService { // Changed class declarati
 
     @Override
     public boolean deleteUser(String userId) {
-        User userToDelete = userDatabase.getAllUsers().stream()
-                                    .filter(user -> user.getId().equals(userId))
-                                    .findFirst()
-                                    .orElse(null);
+        User userToDelete = this.findUserById(userId);
 
         if (userToDelete == null) {
             return false; // User not found
@@ -110,5 +107,10 @@ public class AuthServiceImpl implements AuthService { // Changed class declarati
         updatedUser.setRole(currentUser.getRole());
 
         return userDatabase.updateUser(updatedUser);
+    }
+
+    @Override
+    public User findUserById(String id) {
+        return userDatabase.findUserById(id);
     }
 }

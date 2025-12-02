@@ -34,7 +34,7 @@ public class UserDatabase {
         // Regular user 2
         User user2 = new User();
         user2.setId(generateUserId());
-        user2.setUsername("john");
+        user2.setUsername("john2");
         user2.setPassword("john123");
         user2.setRole("USER");
         users.add(user2);
@@ -83,14 +83,14 @@ public class UserDatabase {
     }
 
     // NEW: Check if admin exists
-    public boolean adminExists() {
-        for (User user : users) {
-            if (user.isAdmin()) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    public boolean adminExists() {
+//        for (User user : users) {
+//            if (user.isAdmin()) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     public boolean deleteUser(String userId) {
         return users.removeIf(user -> user.getId().equals(userId));
@@ -104,5 +104,14 @@ public class UserDatabase {
             }
         }
         return false;
+    }
+
+    public User findUserById(String id) {
+        for (User user : users) {
+            if (user.getId().equals(id)) {
+                return user;
+            }
+        }
+        return null;
     }
 }

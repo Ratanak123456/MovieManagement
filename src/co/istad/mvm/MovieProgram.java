@@ -374,11 +374,7 @@ public class MovieProgram {
             return;
         }
 
-        List<User> allUsers = authService.getUserDatabase().getAllUsers();
-        User userToDelete = allUsers.stream()
-                                    .filter(user -> user.getId().equals(userIdToDelete))
-                                    .findFirst()
-                                    .orElse(null);
+        User userToDelete = authService.findUserById(userIdToDelete);
 
         if (userToDelete == null) {
             ViewUtil.printErrorMessage("User with ID '" + userIdToDelete + "' not found!");
