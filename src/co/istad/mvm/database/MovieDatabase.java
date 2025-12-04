@@ -150,38 +150,6 @@ public class MovieDatabase {
         movie12.setDuration(181);
         movies.add(movie12);
 
-        // Movie 13: Joker
-        Movie movie13 = new Movie();
-        movie13.setId(generateMovieId());
-        movie13.setTitle("Joker");
-        movie13.setDirector("Todd Phillips");
-        movie13.setReleaseYear(2019);
-        movie13.setGenre("Crime");
-        movie13.setRating(8.4);
-        movie13.setDuration(122);
-        movies.add(movie13);
-
-        // Movie 14: The Silence of the Lambs
-        Movie movie14 = new Movie();
-        movie14.setId(generateMovieId());
-        movie14.setTitle("The Silence of the Lambs");
-        movie14.setDirector("Jonathan Demme");
-        movie14.setReleaseYear(1991);
-        movie14.setGenre("Thriller");
-        movie14.setRating(8.6);
-        movie14.setDuration(118);
-        movies.add(movie14);
-
-        // Movie 15: Gladiator
-        Movie movie15 = new Movie();
-        movie15.setId(generateMovieId());
-        movie15.setTitle("Gladiator");
-        movie15.setDirector("Ridley Scott");
-        movie15.setReleaseYear(2000);
-        movie15.setGenre("Action");
-        movie15.setRating(8.5);
-        movie15.setDuration(155);
-        movies.add(movie15);
     }
 
     // Add this method to generate movie IDs

@@ -37,9 +37,6 @@ public class MovieProgram {
                 case 2:
                     userLogin();
                     break;
-                case 3:
-                    addNewUser();
-                    break;
                 case 0:
                     ViewUtil.printSuccessMessage("Thank you for using Movie Management System. Goodbye! 👋");
                     return;
@@ -325,6 +322,7 @@ public class MovieProgram {
             }
         }
     }
+
     private void editUserProfile() {
         ViewUtil.printHeader("✏️ EDIT PROFILE");
         User currentUser = authService.getSession().getCurrentUser();
@@ -454,7 +452,7 @@ public class MovieProgram {
 
     private void viewAllMovies() {
         ViewUtil.printHeader("🎬 ALL MOVIES");
-        List<Movie> movies = movieService.getAllMovies();
+        List<Movie> movies = movieService.getAllMovies().reversed();
         int pageSize = 5;
         int totalMovies = movies.size();
         int totalPages = (int) Math.ceil((double) totalMovies / pageSize);

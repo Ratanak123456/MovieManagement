@@ -19,7 +19,7 @@ public class UserDatabase {
         User admin = new User();
         admin.setId(generateUserId());
         admin.setUsername("admin");
-        admin.setPassword("admin123");
+        admin.setPassword("123helloadmin");
         admin.setRole("ADMIN");
         users.add(admin);
 
@@ -81,16 +81,6 @@ public class UserDatabase {
     public List<User> getAllUsers() {
         return new ArrayList<>(users);
     }
-
-    // NEW: Check if admin exists
-//    public boolean adminExists() {
-//        for (User user : users) {
-//            if (user.isAdmin()) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     public boolean deleteUser(String userId) {
         return users.removeIf(user -> user.getId().equals(userId));
